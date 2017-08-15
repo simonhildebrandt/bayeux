@@ -1,0 +1,26 @@
+{
+  "name": "bayeux",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "watch": "watchify _client.js -o client.js -p browserify-notify --debug",
+    "serve": "live-server",
+    "server": "ls main.js | entr -r node main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.4",
+    "express": "^4.15.4",
+    "reconnect": "^2.0.2",
+    "redis-connection": "^5.1.1",
+    "shoe": "0.0.15",
+    "through": "^2.3.8",
+    "through2": "^2.0.3"
+  },
+  "devDependencies": {
+    "locus": "^2.0.1",
+    "watchify": "^3.9.0"
+  }
+}
