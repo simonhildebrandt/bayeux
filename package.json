@@ -6,13 +6,14 @@
   "scripts": {
     "watch": "watchify _client.js -o client.js -p browserify-notify --debug",
     "serve": "live-server",
-    "server": "ls main.js | entr -r node main.js"
+    "start": "ls main.js | entr -r node --inspect main.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.4",
     "express": "^4.15.4",
+    "passport": "^0.4.0",
     "reconnect": "^2.0.2",
     "redis-connection": "^5.1.1",
     "shoe": "0.0.15",
