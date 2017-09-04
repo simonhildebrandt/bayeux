@@ -116,6 +116,7 @@ var sock = shoe((stream) => {
   new Client(pub, stream, () => {
     // Remove user from `users`
     console.log('removing user')
+    pub.hdel('users', stream.id)
   })
 })
 
