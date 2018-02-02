@@ -1,0 +1,115 @@
+"use strict"
+
+var shoe = require('shoe')
+  , express = require('express');
+
+var level = require('level'),
+    db = level('my-database', { valueEncoding: 'json' }),
+    hooks = require('level-hooks'),
+    post = require('level-post'),
+    bytewise = require('bytewise'),
+    enc = bytewise.encode,
+    dec = bytewise.decode,
+    prefix = 'main',
+    index = 'index',
+    range = require('./range')
+
+var View = require('./view')
+
+/*
+  Store view index paths in DB
+  Create new indices on the fly
+  List all indices with paths and description
+  Users subscribe to indices, and unsubscribe
+*/
+
+
+hooks(db)
+
+var view = new View(db, index, range(prefix), (change) => {
+  console.log('creating key for', change)
+  return [change.body]
+})
+
+const timestamp = require('monotonic-timestamp')
+function asd (data) {
+  return enc([prefix, data.model, timestamp()]).toString('hex')
+}
+
+var sock = shoe((stream) => {
+
+  db.createReadStream()
+  .on('data', function (data) {
+    console.log('datum', data)
+    stream.write(JSON.stringify({action: 'create', key: data.key, value: data.value}));
+  })
+  .on('error', function (err) {
+    console.log('Oh my!', err)
+  })
+  .on('close', function () {
+    console.log('Stream closed')
+
+    var remover = db.hooks.post(function(op) {
+
+      console.log('op!', op)
+      if(op.type === 'put') {
+        stream.write(JSON.stringify({action: 'create', key: op.key, label: dec(op.key), value: op.value}));
+      }
+      if(op.type === 'del') {
+        stream.write(JSON.stringify({action: 'delete', key: op.key}));
+      }
+    })
+  })
+
+  stream.on('data', (msg) => {
+    const data = JSON.parse(msg)
+    console.log('data', data)
+    if (data.action === 'index') {
+      id = enc(['indices', data.key])
+      console.log('writing index')
+      db.put(id, data.body, function(response) {
+        console.log(response)
+      })
+    }
+    if (data.action === 'deindex') {
+
+    }
+
+    if (data.action === 'create') {
+      var id = asd()
+      console.log('writing', id, data.data)
+      db.put(id, data.data, function(response) {
+        //console.log('put response', response)
+      })
+    }
+    if (data.action === 'update') {
+      console.log('updating', data.data)
+      db.put(data.id, data.data, function(response) {
+        //console.log('put response', response)
+      })
+    }
+    if (data.action === 'delete') {
+      db.del(data.id, function(response) {
+        //console.log('delete response', response)
+      })
+    }
+  })
+
+  stream.on('close', function () {
+    console.log('close', stream.id)
+    //remover()
+  })
+
+  //stream.pipe(process.stdout, { end : false });
+})
+
+
+var app = express()
+var cors = require('cors')
+app.use(cors())
+
+var PORT = 9999
+sock.install(app.listen(PORT), '/sub')
+
+console.log("Listening on " + PORT)
+s
