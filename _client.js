@@ -59,7 +59,7 @@ class Viewer extends React.Component {
       </thead>
       <tbody>
         { Object.entries(this.data()).map(([k, v]) => {
-          return <ViewRow id={k} record={v} update={ (event, id) => this.update(id) } nuke={ (event, id) => this.nuke(event, id) } />
+          return <ViewRow id={k} record={v} update={ (event, id) => this.update(event, id) } nuke={ (event, id) => this.nuke(event, id) } />
         }) }
       </tbody>
     </table>
@@ -133,6 +133,10 @@ class Subscription {
 
   delete(id) {
     this.client.delete(this.key, id)
+  }
+
+  update(id) {
+    this.client.send({action: 'put', id: id, body: new Date().toString()})
   }
 }
 
