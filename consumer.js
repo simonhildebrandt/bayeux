@@ -58,11 +58,9 @@ class Subscription {
 
     this.range = range([])
 
-    console.log(this.range)
-
     const db = this.consumer.getDb()
 
-    db.createReadStream()//this.range)
+    db.createReadStream(this.range)
     .on('data', (data) => {
       this.publish({type: 'put', key: data.key, value: data.value})
     })

@@ -8,7 +8,7 @@ import { decode } from 'bytewise'
 
 function ViewRow({id, record, update, nuke}) {
   return <tr>
-    <td>{ id }</td><td>{ record }</td>
+    <td>{ decode(id).join('/') }</td><td>{ record }</td>
     <td>
       <a href="#" onClick={(event) => nuke(event, id) }>X</a>
       <a href="#" onClick={(event) => update(event, id) }>Y</a>
@@ -51,11 +51,15 @@ class Viewer extends React.Component {
     this.subscription.delete(id)
   }
 
+  close(event) {
+    event.preventDefault()
+    this.props.close()
+  }
+
   render() {
-    console.log('current', this.data())
     return <table>
       <thead>
-        <tr><th>id</th><th>body</th></tr>
+        <tr><th>id</th><th>body</th><th><a href="#" onClick={ (event) => this.close(event) }>X</a></th></tr>
       </thead>
       <tbody>
         { Object.entries(this.data()).map(([k, v]) => {
@@ -100,6 +104,10 @@ class ViewerList extends React.Component {
     }
   }
 
+  close(subscription) {
+    this.setState({subscriptions: this.state.subscriptions.filter((s) => s !== subscription)})
+  }
+
   render() {
     return <div>
       <div>
@@ -113,7 +121,7 @@ class ViewerList extends React.Component {
       </div>
       <div>
         { this.state.subscriptions.map((subscription) => {
-          return <Viewer subscription={subscription} />
+          return <Viewer subscription={subscription} close={() => {this.close(subscription)}} />
         }) }
         </div>
     </div>
@@ -136,7 +144,7 @@ class Subscription {
   }
 
   update(id) {
-    this.client.send({action: 'put', id: id, body: new Date().toString()})
+    this.client.send({action: 'put', id: id, body: new Date().valueOf()})
   }
 }
 
