@@ -6,7 +6,7 @@
   "scripts": {
     "watch": "watchify _client.js -o client.js -p browserify-notify --debug --standalone BayeuxClient",
     "serve": "live-server",
-    "dev":   "npm run watch & npm run serve",
+    "dev": "npm run watch & npm run serve",
     "start": "ls main.js consumer.js | entr -r node --inspect main.js"
   },
   "browserify": {
@@ -44,7 +44,6 @@
     "level-sublevel": "^6.6.1",
     "ltgt": "^2.2.0",
     "monotonic-timestamp": "0.0.9",
-    "object-path": "^0.11.4",
     "pairs": "0.0.2",
     "passport": "^0.4.0",
     "range-bucket": "0.0.6",
@@ -66,6 +65,7 @@
     "live-server": "^1.2.0",
     "locus": "^2.0.1",
     "multilevel": "^7.3.0",
+    "object-path": "^0.11.4",
     "watchify": "^3.9.0"
   }
 }

@@ -2,5 +2,5 @@ var bytewise = require('bytewise'),
     enc = bytewise.encode
 
 module.exports = function(key) {
-  return {start: enc([...key, null]).toString('hex'), end: enc([...key, undefined]).toString('hex')}
+  return {gte: enc([...key, null]).toString('hex'), lte: enc([...key, undefined]).toString('hex')}
 }

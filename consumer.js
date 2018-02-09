@@ -1,9 +1,11 @@
 const range = require('./range')
 const { encode, decode } = require('bytewise')
 const timestamp = require('monotonic-timestamp')
+const objectPath = require("object-path")
 
 const main_prefix = 'main'
-
+const index_prefix = 'index'
+const ltgt = require('ltgt')
 
 class Consumer {
   constructor(stream, db) {
@@ -27,6 +29,10 @@ class Consumer {
       }
       if (data.action === 'delete') {
         this.db.del(data.id, (result) => console.log(result))
+      }
+      if (data.action === 'index') {
+        const id = encode([index_prefix, data.path]).toString('hex')
+        this.db.put(id, {name: data.name, path: data.path}, (result) => console.log(result))
       }
       if (data.action === 'subscribe') {
         const key = data.key
@@ -56,7 +62,14 @@ class Subscription {
     this.consumer = consumer
     this.key = key
 
-    this.range = range([])
+    console.log('creating subscription', key)
+    if (key == 'all') {
+      this.range = range([])
+    } else {
+      this.range = range([key])
+    }
+
+    console.log(this.range, decode(this.range.gte), decode(this.range.lte))
 
     const db = this.consumer.getDb()
 
@@ -66,7 +79,10 @@ class Subscription {
     })
     .on('end', () => {
       this.remover = db.hooks.post((op) => {
-        this.publish(op)
+        if (ltgt.contains(this.range, op.key)) {
+          console.log(op.key, 'is in', this.range, ltgt.contains(this.range, op.key))
+          this.publish(op)
+        }
       })
     })
     .on('error', (x) => {

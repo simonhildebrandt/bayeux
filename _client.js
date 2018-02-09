@@ -8,7 +8,7 @@ import { decode } from 'bytewise'
 
 function ViewRow({id, record, update, nuke}) {
   return <tr>
-    <td>{ decode(id).join('/') }</td><td>{ record }</td>
+    <td>{ decode(id).join('/') }</td><td>{ JSON.stringify(record) }</td>
     <td>
       <a href="#" onClick={(event) => nuke(event, id) }>X</a>
       <a href="#" onClick={(event) => update(event, id) }>Y</a>
@@ -78,13 +78,17 @@ class ViewerList extends React.Component {
     this.client = new Client()
 
     this.state = {
-      subscriptions: [this.client.subscribe('all')],
-      indices: ['all']
+      subscriptions: [],
+      indices: ['all', 'index']
     }
   }
 
   subscribe(key) {
     this.setState({subscriptions: [...this.state.subscriptions, this.client.subscribe(key)]})
+  }
+
+  close(subscription) {
+    this.setState({subscriptions: this.state.subscriptions.filter((s) => s !== subscription)})
   }
 
   newView(key) {
@@ -94,7 +98,9 @@ class ViewerList extends React.Component {
 
   createIndex(event) {
     event.preventDefault()
-    console.log(event)
+    if (event.keyCode == 13) {
+      this.client.index(this.name.value, this.input.value)
+    }
   }
 
   createDocument(event) {
@@ -102,10 +108,6 @@ class ViewerList extends React.Component {
       event.preventDefault()
       this.client.send({action: 'put', body: event.target.value})
     }
-  }
-
-  close(subscription) {
-    this.setState({subscriptions: this.state.subscriptions.filter((s) => s !== subscription)})
   }
 
   render() {
@@ -158,18 +160,24 @@ class Client {
     })
 
     this.tree = new Baobab({})
-    this.mainCursor = this.tree.select()
+    this.subCount = {}
 
-    this.subscriptions = {}
+    this.subscribe('index')
   }
 
   subscribe(key) {
-    if (!this.subscriptions[key]) {
+    if (this.subCount[key]) {
+      this.subCount[key] += 1
+    } else {
+      this.subCount[key] = 1
       this.tree.select(key).set({})
-      this.subscriptions[key] = new Date()
       this.send({action: 'subscribe', key: key})
     }
     return new Subscription(this, key)
+  }
+
+  unsubscribe(key) {
+    this.subCount[key] =- 1
   }
 
   delete(index, id) {
@@ -179,6 +187,10 @@ class Client {
   send(data) {
     console.log('writing', data)
     this.stream.write(JSON.stringify(data))
+  }
+
+  index(name, path) {
+    this.send({action: 'index', name: name, path: path})
   }
 
   processMessage(msg) {
