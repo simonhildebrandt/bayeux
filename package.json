@@ -7,7 +7,7 @@
     "watch": "watchify _client.js -o client.js -p browserify-notify --debug --standalone BayeuxClient",
     "serve": "live-server",
     "dev": "npm run watch & npm run serve",
-    "start": "ls main.js consumer.js | entr -r node --inspect main.js"
+    "start": "ls main.js consumer.js subscription.js indexer.js | entr -r node --inspect main.js"
   },
   "browserify": {
     "transform": [
@@ -57,7 +57,8 @@
     "through": "^2.3.8",
     "through2": "^2.0.3",
     "touchtone": "^1.0.2",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "object-path": "^0.11.4"
   },
   "devDependencies": {
     "browserify-notify": "^1.1.2",
@@ -65,7 +66,6 @@
     "live-server": "^1.2.0",
     "locus": "^2.0.1",
     "multilevel": "^7.3.0",
-    "object-path": "^0.11.4",
     "watchify": "^3.9.0"
   }
 }

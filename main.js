@@ -1,23 +1,22 @@
 "use strict"
 
-var shoe = require('shoe')
+const shoe = require('shoe')
   , express = require('express');
 
-var level = require('level'),
+const level = require('level'),
     db = level('my-database', { valueEncoding: 'json' }),
     hooks = require('level-hooks'),
     post = require('level-post'),
     bytewise = require('bytewise'),
-    enc = bytewise.encode,
-    dec = bytewise.decode,
-    prefix = 'main',
-    index = 'index',
     range = require('./range')
 
-var View = require('./view')
-var Consumer = require('./consumer')
+const View = require('./view')
+const Consumer = require('./consumer')
+const Indexer = require('./indexer')
 
 hooks(db)
+
+const indexer = new Indexer(db)
 
 var sock = shoe((stream) => {
   console.log('connected', stream.id)
@@ -25,11 +24,11 @@ var sock = shoe((stream) => {
 })
 
 
-var app = express()
-var cors = require('cors')
+const app = express()
+const cors = require('cors')
 app.use(cors())
 
-var PORT = 9999
+const PORT = 9999
 sock.install(app.listen(PORT), '/sub')
 
 console.log("Listening on " + PORT)

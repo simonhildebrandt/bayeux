@@ -1,11 +1,9 @@
-const range = require('./range')
 const { encode, decode } = require('bytewise')
 const timestamp = require('monotonic-timestamp')
 const objectPath = require("object-path")
 
-const main_prefix = 'main'
-const index_prefix = 'index'
-const ltgt = require('ltgt')
+const Subscription = require('./subscription')
+const { main_range, main_prefix, index_prefix } = require('./constants')
 
 class Consumer {
   constructor(stream, db) {
@@ -15,9 +13,13 @@ class Consumer {
     this.db = db
     this.subscriptions = {}
 
-    stream.on('close', function () {
+    stream.on('close', () => {
       console.log('close', stream.id)
       // remove db hooks
+      Object.entries(this.subscriptions).map(([key, sub]) => {
+        console.log('close subscription', key)
+        sub.close()
+      })
     })
 
     stream.on('data', (msg) => {
@@ -25,7 +27,12 @@ class Consumer {
       console.log('data', data)
       if (data.action === 'put') {
         const id = data.id || encode([main_prefix, timestamp()]).toString('hex')
-        this.db.put(id, data.body, (result) => console.log(result))
+        try {
+          const body = JSON.parse(data.body)
+          this.db.put(id, body, {}, (err, result) => console.log(err, result))
+        } catch(exp) {
+          console.log("Couldn't parse", data.body)
+        }
       }
       if (data.action === 'delete') {
         this.db.del(data.id, (result) => console.log(result))
@@ -39,7 +46,7 @@ class Consumer {
         console.log('subscribing to', key)
 
         if (!this.subscriptions[key]) {
-          this.subscriptions[key] = new Subscription(this, key)
+          this.subscriptions[key] = new Subscription(this.db, key, (op) => this.send(op))
         }
       }
     })
@@ -48,55 +55,6 @@ class Consumer {
   send(message) {
     console.log('sending', message)
     return this.stream.write(JSON.stringify(message))
-  }
-
-  getDb() {
-    return this.db
-  }
-}
-
-class Subscription {
-  constructor(consumer, key) {
-    console.log('creating subscriber for', key)
-
-    this.consumer = consumer
-    this.key = key
-
-    console.log('creating subscription', key)
-    if (key == 'all') {
-      this.range = range([])
-    } else {
-      this.range = range([key])
-    }
-
-    console.log(this.range, decode(this.range.gte), decode(this.range.lte))
-
-    const db = this.consumer.getDb()
-
-    db.createReadStream(this.range)
-    .on('data', (data) => {
-      this.publish({type: 'put', key: data.key, value: data.value})
-    })
-    .on('end', () => {
-      this.remover = db.hooks.post((op) => {
-        if (ltgt.contains(this.range, op.key)) {
-          console.log(op.key, 'is in', this.range, ltgt.contains(this.range, op.key))
-          this.publish(op)
-        }
-      })
-    })
-    .on('error', (x) => {
-      console.log('err?', x)
-      // Add subscription
-    })
-  }
-
-  close() {
-    this.remover()
-  }
-
-  publish(op) {
-    this.consumer.send({index: this.key, action: op.type, key: op.key, value: op.value})
   }
 }
 

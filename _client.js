@@ -77,9 +77,11 @@ class ViewerList extends React.Component {
 
     this.client = new Client()
 
+    const knownIndices = ['all', 'index']
+
     this.state = {
-      subscriptions: [],
-      indices: ['all', 'index']
+      subscriptions: knownIndices.map((key) => this.client.subscribe(key)),
+      indices: knownIndices
     }
   }
 
@@ -113,9 +115,9 @@ class ViewerList extends React.Component {
   render() {
     return <div>
       <div>
-        <textarea key="new" ref={(field) => this.create = field } onKeyUp={(event) => this.createDocument(event)}></textarea>
-        <input key="name" ref={(field) => this.name = field } type="text"/>
-        <input key="input" ref={(field) => this.input = field } type="text" onKeyUp={(event) => this.createIndex(event)}/>
+        <input key="new" ref={(field) => this.create = field } defaultValue={'{"type": "Simon"}'} onKeyUp={(event) => this.createDocument(event)} />
+        <input key="name" ref={(field) => this.name = field } defaultValue={'type'} type="text"/>
+        <input key="input" ref={(field) => this.input = field } defaultValue={'type'} type="text" onKeyUp={(event) => this.createIndex(event)}/>
 
         { this.state.indices.map((key) => {
           return <a href="#" onClick={(event) => this.newView(key)}>{key}</a>
