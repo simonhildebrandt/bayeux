@@ -49,6 +49,8 @@ class Consumer {
           this.subscriptions[key] = new Subscription(this.db, key, (op) => this.send(op))
         }
       }
+
+      //TODO Unsubscribe
     })
   }
 

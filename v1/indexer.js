@@ -65,6 +65,7 @@ class Indexist {
                 // No existing record
               } else {
                 // I/O or other error, pass it up the callback chain
+                throw(err)
               }
             } else {
               // Existing record found - clear index record

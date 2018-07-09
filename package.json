@@ -4,68 +4,28 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "watch": "watchify _client.js -o client.js -p browserify-notify --debug --standalone BayeuxClient",
-    "serve": "live-server",
-    "dev": "npm run watch & npm run serve",
-    "start": "ls main.js consumer.js subscription.js indexer.js | entr -r node --inspect main.js"
-  },
-  "browserify": {
-    "transform": [
-      [
-        "babelify",
-        {
-          "presets": [
-            "react",
-            "env"
-          ]
-        }
-      ]
-    ]
+    "test": "tape-watch -r @babel/register test/bayeux.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel": "^6.23.0",
-    "babel-core": "^6.26.0",
-    "babel-env": "^2.4.1",
-    "babel-preset-react": "^6.24.1",
-    "babelify": "^8.0.0",
-    "baobab": "^2.5.0",
     "bytewise": "^1.1.0",
-    "calendar-month-string": "^1.0.0",
     "charwise": "^0.1.1",
-    "cors": "^2.8.4",
-    "express": "^4.15.4",
-    "jsonquery-engine": "^1.0.2",
-    "level-hooks": "^4.5.0",
-    "level-indico": "^0.3.1",
-    "level-post": "^1.0.5",
-    "level-queryengine": "^3.0.1",
-    "level-sublevel": "^6.6.1",
     "ltgt": "^2.2.0",
     "monotonic-timestamp": "0.0.9",
-    "pairs": "0.0.2",
-    "passport": "^0.4.0",
-    "range-bucket": "0.0.6",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
+    "object-path": "^0.11.4",
     "reconnect": "^2.0.2",
-    "redis-connection": "^5.1.1",
-    "shoe": "0.0.15",
-    "subindex": "^3.0.0",
-    "sublevel": "^2.4.0",
-    "through": "^2.3.8",
-    "through2": "^2.0.3",
-    "touchtone": "^1.0.2",
-    "uuid": "^3.1.0",
-    "object-path": "^0.11.4"
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "browserify-notify": "^1.1.2",
+    "@babel/core": "^7.0.0-beta.49",
+    "@babel/node": "^7.0.0-beta.49",
+    "@babel/preset-env": "^7.0.0-beta.49",
+    "@babel/register": "^7.0.0-beta.49",
     "level": "^2.0.0",
-    "live-server": "^1.2.0",
-    "locus": "^2.0.1",
-    "multilevel": "^7.3.0",
-    "watchify": "^3.9.0"
+    "proxyquire": "^2.0.1",
+    "rxjs": "^6.2.0",
+    "tape": "^4.9.0",
+    "tape-watch": "^2.3.0"
   }
 }

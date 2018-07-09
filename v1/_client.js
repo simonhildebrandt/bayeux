@@ -77,12 +77,25 @@ class ViewerList extends React.Component {
 
     this.client = new Client()
 
-    const knownIndices = ['all', 'index']
+    this.indicesUpdated = (event) => {
+      console.log('indicesUpdated', this.client.indices.cursor().get())
+
+      this.setState({indices: Object.values(this.client.indices.cursor().get())})
+    }
 
     this.state = {
-      subscriptions: knownIndices.map((key) => this.client.subscribe(key)),
-      indices: knownIndices
+      subscriptions: [],
+      indices: []
     }
+  }
+
+  componentDidMount() {
+    this.client.indices.cursor().on('update', this.indicesUpdated)
+  }
+
+
+  componentWillUnmount() {
+    this.client.indices.cursor().off('update', this.indicesUpdated)
   }
 
   subscribe(key) {
@@ -113,14 +126,15 @@ class ViewerList extends React.Component {
   }
 
   render() {
+    const indices = this.state.indices.concat(['all', 'index'])
     return <div>
       <div>
         <input key="new" ref={(field) => this.create = field } defaultValue={'{"type": "Simon"}'} onKeyUp={(event) => this.createDocument(event)} />
         <input key="name" ref={(field) => this.name = field } defaultValue={'type'} type="text"/>
         <input key="input" ref={(field) => this.input = field } defaultValue={'type'} type="text" onKeyUp={(event) => this.createIndex(event)}/>
 
-        { this.state.indices.map((key) => {
-          return <a href="#" onClick={(event) => this.newView(key)}>{key}</a>
+        { indices.map(({name}) => {
+          return <a href="#" onClick={(event) => this.newView(name)}>{name}</a>
         })}
       </div>
       <div>
@@ -164,7 +178,7 @@ class Client {
     this.tree = new Baobab({})
     this.subCount = {}
 
-    this.subscribe('index')
+    this.indices = this.subscribe('index')
   }
 
   subscribe(key) {
