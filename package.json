@@ -1,31 +1,18 @@
 {
   "name": "bayeux",
   "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "test": "tape-watch -r @babel/register test/bayeux.js"
-  },
-  "author": "",
-  "license": "ISC",
+  "main": "index.js",
+  "repository": "git@github.com:simonhildebrandt/bayeux.git",
+  "author": "Simon Hildebrandt <simonhildebrandt@gmail.com>",
+  "license": "MIT",
   "dependencies": {
-    "bytewise": "^1.1.0",
-    "charwise": "^0.1.1",
-    "ltgt": "^2.2.0",
-    "monotonic-timestamp": "0.0.9",
-    "object-path": "^0.11.4",
-    "reconnect": "^2.0.2",
-    "uuid": "^3.1.0"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.0.0-beta.49",
-    "@babel/node": "^7.0.0-beta.49",
-    "@babel/preset-env": "^7.0.0-beta.49",
-    "@babel/register": "^7.0.0-beta.49",
-    "level": "^2.0.0",
-    "proxyquire": "^2.0.1",
-    "rxjs": "^6.2.0",
-    "tape": "^4.9.0",
-    "tape-watch": "^2.3.0"
+    "@babel/core": "^7.14.6",
+    "@babel/node": "^7.14.7",
+    "@babel/preset-env": "^7.14.7",
+    "babel-watch": "^7.4.1",
+    "lokijs": "^1.5.12",
+    "node-object-hash": "^2.3.7",
+    "searchjs": "^1.1.0",
+    "socket.io": "^4.1.2"
   }
 }
