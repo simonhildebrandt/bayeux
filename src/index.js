@@ -1,82 +1,68 @@
-import loki from 'lokijs';
+import regeneratorRuntime from "regenerator-runtime";
+
 import hasher from 'node-object-hash';
 
-const { hash } = hasher(); 
+import { connect, table, row } from 'rethinkdb';
 
-const db = new loki('Example');
+const { hash } = hasher();
 
-const users = db.addCollection('users', { indices: ['email'] });
-var odin = users.insert( { name : 'odin', email: 'odin.soap@lokijs.org', age: 38 } );
-var thor = users.insert( { name : 'thor', email : 'thor.soap@lokijs.org', age: 25 } );
+console.log("\n\nStarted");
 
-const subscriptions = db.addCollection('subscriptions', {indices: ['clientId', 'viewId']})
+var connP = connect({db: 'test'}); // bayeux
 
-const views = {};
+async function action(connP) {
+  const conn = await connP;
 
-
-function subscribe(clientId, query) {
-  const viewId = hash(query);
-  let dv = views[viewId];
-  if (dv) {
-    console.log("found view for", JSON.stringify(query));
-  } else {
-    console.log("didn't find view for", JSON.stringify(query));
-    dv = users.addDynamicView(viewId);
-    const {find = {}, limit = 10, sort = []} = query;
-    dv.applyFind(find);
-    if (sort.length > 0) dv.applySortCriteria(sort);
-    views[viewId] = {view: dv, limit};
-
-    dv.on('rebuild', view => notifyClients(view.name));
-  }
-
-  subscriptions.insert({clientId, viewId});
-
-  return dv.data();
+  table('tv_shows').filter(row('episodes').gt(100)).changes().run(conn, (err, cursor) => {
+    cursor.each((err, change) => console.log({change}))
+  });
 }
 
 
-console.log("\n\nStarted")
+action(connP);
 
 const clients = {};
 
-function notifyClients(viewId) {
-  const {view, limit} = views[viewId];
-  const data = view.data();
+// function notifyClients(viewId) {
+//   const dv = views[viewId];
+//   const subs = subscriptions.where(r => r.viewId == viewId)
+//   const result = dataMessage(dv);
+//   console.log('reporting', result)
 
-  const subs = subscriptions.where(r => r.viewId == viewId)
-
-  subs.forEach(({clientId}) => {
-    io.in(clientId)
-    .fetchSockets()
-    .then(sockets => {
-      sockets.map(socket => socket.emit('message', data))
-    })
-  })
-}
+//   subs.forEach(({clientId}) => {
+//     io.in(clientId)
+//     .fetchSockets()
+//     .then(sockets => {
+//       sockets.forEach(socket => socket.emit('message', result))
+//     })
+//   })
+// }
 
 const io = require('socket.io')(3000, {cors: {
   origin: "*",
   methods: ["GET", "POST"]
 }});
 
-io.on('connection', client => { 
+io.on('connection', client => {
   const clientId = client.id;
   console.log('connection', clientId)
   clients[client.id] = new Date();
-  client.on('disconnect', () => { 
+  client.on('disconnect', () => {
     console.log('disconnect');
-    subscriptions.removeWhere({clientId});
+    // subscriptions.removeWhere({clientId});
     delete(clients[client.id]);
-  }); 
+  });
   client.on("subscribe", query => {
     console.log("subscribe", query);
-    const data = subscribe(client.id, query);
-    client.emit("message", data);
+    // const dv = subscribe(client.id, query);
+    // client.emit("message", dataMessage(dv));
+  });
+  client.on("unsubscribe", query => {
+    console.log("unsubscribe", query);
+    // unsubscribe(client.id);
   });
   client.on("update", update => {
     console.log("update", update);
-    users.insert(update.data);
+    // users.insert(update.data);
   });
 });
-

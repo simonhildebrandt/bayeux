@@ -4,6 +4,10 @@
   "main": "index.js",
   "repository": "git@github.com:simonhildebrandt/bayeux.git",
   "author": "Simon Hildebrandt <simonhildebrandt@gmail.com>",
+  "scripts": {
+    "start": "babel-watch --inspect -- ./src/index.js",
+    "start-db": "brew services start rethinkdb"
+  },
   "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.14.6",
@@ -12,6 +16,7 @@
     "babel-watch": "^7.4.1",
     "lokijs": "^1.5.12",
     "node-object-hash": "^2.3.7",
+    "rethinkdb": "^2.4.2",
     "searchjs": "^1.1.0",
     "socket.io": "^4.1.2"
   }
