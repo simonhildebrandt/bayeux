@@ -1,0 +1,17 @@
+{
+  "name": "testbed",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "serve": "web-dev-server -p 8000 -r dev --open --watch --app-index dev/index.html",
+    "watch": "yarn esbuild src/index.jsx --bundle --outfile=dev/index.js --watch --jsx=automatic"
+  },
+  "dependencies": {
+    "@web/dev-server": "^0.4.6",
+    "esbuild": "^0.25.6",
+    "nanoevents": "^9.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}
